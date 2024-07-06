@@ -1,13 +1,10 @@
 import sys
 import math
-#Session05:
 import random
-
-
+import time
 
 from OpenGL.GL  import *
 from OpenGL.GLU import *
-
 
 import pygame
 from pygame.locals import *
@@ -18,27 +15,18 @@ white = (255,255,255)
 red = (255,0,0)
 green = (0,255,0)
 blue = (0,0,255)
-purple = (255,0,255)
-cyane = (0,255,255)
 
-# Sound
+
+# Sound #Χατχηπαναγιωτιδου
 pygame.mixer.init()
 
 crash_sound = pygame.mixer.Sound("crash_sound.wav")
-game_over_sound = pygame.mixer.Sound("game_over.wav")
 
 pygame.mixer.music.load('bg_music.wav')
 pygame.mixer.music.play(-1)
 
-
-
-
-
-    
-    
-    
-    
-
+# Font
+pygame.font.init()
 
 
 class Light(object):
@@ -68,12 +56,6 @@ class Light(object):
             glEnable(GL_LIGHTING)
             Light.enabled = True
         glEnable(self.light_id)
- 
-
-#The sides of the cube are: the back face (0,1,2,3) the right face is (4,5,1,0)
-
-# We arrange the vertices in counterclockwise, which will help in the optimization
-# face culling which consists of drawing only the visible faces of the polygon
 
 class Cube(object):
     sides = ((0,1,2,3), (3,2,7,6), (6,7,5,4),
@@ -98,12 +80,6 @@ class Cube(object):
     def __init__(self, position, size, color):
         self.position = position
         self.color = color
-        #lamba is used to define anonymous function
-        #the lamda function is equivelant with:
-        #def divide_by_2(i):
-        # return i/2
-
-        #map() apply a function to each item in an iterable (list/tupple) and return new iterable
         x,y,z = map(lambda i: i/2, size)
 
         self.vertices = (
@@ -117,40 +93,14 @@ class Cube(object):
     #we add a render function for this object
     def render(self):
         glPushMatrix()
-        #Move (translate) the current matrix by a certain amount along the x,y,z axes
-        #glTranslatef(x,y,z). The x,y,z are the amounts that you want to translate the current
-        #matrix along the x,y,z axis. The *self.position is used to unpack a tupple  or
-        # list of three variables and pass them as seperate arguments
         glTranslatef(*self.position)
 
-        glBegin(GL_QUADS) #treat each group of four vertices as independed quadrilateral
-        # glMaterialfv(GL_FRONT, GL_DIFFUSE, self.color)
-        # glMaterial(GL_FRONT, GL_SPECULAR, self.color)
-        # glMaterial(GL_FRONT, GL_SHININESS, 10.0)
+        glBegin(GL_QUADS) 
         for side in Cube.sides:            
             for v in side:
-                #list of three floats that specify vertex
-                #executed after glBegin and before glEnd
-                #delimite the vertices
                 glVertex3fv(self.vertices[v])
         glEnd()
-
-        # glShadeModel(GL_SMOOTH)
-        # #glBegin(GL_LINES)
-        # glBegin(GL_POLYGON)
-                
-        # for edge in Cube.edges:
-        #     glColor3fv((0.0,1.0,0.0))
-        #     for vertex in edge:
-        #         glVertex3fv(self.vertices[vertex])
-        # glEnd()
-
-
-
         glPopMatrix()
-
-
-
 
 
 class Sphere(object):
@@ -174,9 +124,8 @@ class Sphere(object):
             glPopMatrix()
 
 
-
-
-#Session05: we add the Block class which inherits from the Cube
+        
+#we add the Block class which inherits from the Cube
 class Block(Cube):
     color = (1, 0, 0)
     speed = 0.01
@@ -192,13 +141,7 @@ class Block(Cube):
         z += Block.speed * dt
         self.position = x, y, z
 
-
-
-
-
-
-
- 
+#Χλιαρα
 class Game_Over:
     def __init__(self, width = 800, height = 600):
         self.width= width
@@ -206,9 +149,7 @@ class Game_Over:
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Game Over")
         self.background = (10,10,50)
-
-    
-
+        
     def run(self):
         running= True
         while running:
@@ -218,11 +159,8 @@ class Game_Over:
 
     
             self.screen.fill(self.background)
-           
             self.display()
             pygame.display.flip()
-
-
 
 
 class App(object):
@@ -233,45 +171,29 @@ class App(object):
         self.height=height
         self.angle=0
         self.distance=20
-        self.screen = pygame.display.set_mode((width, height))
-        self.image = pygame.image.load("_game_over_.png")
-        self.image = pygame.transform.scale(self.image, (width, height))
-
-        
-        
-        
-       
-        
-        #Session05:
-        self.game_intro = False
         self.game_over = False
         self.random_dt = 0
         self.blocks = []
         self.light = Light(GL_LIGHT0, (0,15,-25,1))
         self.player= Sphere(1, position=(0,0,0), color= red)
         self.ground = Cube(position=(0,-1,-20), size=(16,1,60), color=(1,1,1,1))
-
-
         
-   
-    
-        #Session05: we comment out everything
-        #self.light=Light(GL_LIGHT0, (15,5,15,1))
-        #Sphere(radius, position, color)
-        #self.sphere1 = Sphere(2, (0,0,0),(1,1,1,1))
-        #self.sphere2 = Sphere(1,(4,2,0), (1,0.4,0.4,1))
-        #self.sphere3 = Sphere(0.5,(2,2,0), (1,0,0,1))
-        #cube (position, size, color)
-        #self.cube1 = Cube((5,4,0),(2,2,2),(0.678,0.847,0.902,1.0))
-        #self.cube1 = Cube((-5,-4,0),(2,2,2),(0.0, 0.0, 1.0, 1.0))
-
+        #Show Timer and Image on Game Over Screen  #Χλιαρα
+        self.start_time = 0
+        self.end_time = time.time()
+        self.elapsed_time = self.end_time - self.start_time
+        self.screen = pygame.display.set_mode((width, height))
+        self.image = pygame.image.load("_game_over_.png")
+        self.image = pygame.transform.scale(self.image, (width, height))
+        self.font = pygame.font.SysFont("Verdana", 35)
+        self.text = self.font.render(f"Τime: {self.elapsed_time:.2f} seconds", True, (255,255,255))
+        self.screen.blit(self.text, (100, 0))
        
 
     def start(self):
         pygame.init()
         pygame.display.set_mode((self.width, self.height), OPENGL | DOUBLEBUF)
         pygame.display.set_caption(self.title)
-
         #enable GL capabilities
         #=>depth comparions and update depth buffer
         glEnable(GL_DEPTH_TEST)
@@ -280,66 +202,33 @@ class App(object):
         #=>enables light constant 0 (up to 8 can be used)
         glEnable(GL_LIGHT0)
 
-   
-   
-  
-        
-
-       
         glEnable(GL_DEPTH_TEST)
         self.light.enable()
-
-
-        #NOTE: with lighting, the colors do not use the glColor
-        #but the lighting computation AND glMaterial
-        #
-        #if you like lighting with glColor then enable 
-        #glEnable(GL_COLOR_MATERIAL)
-        #glColor4f(r,g,b,a) #=> red, green, blue, alpha (0.0 zero intensity - 1.0 full intensity=brightness)
-
-        #clear values, default value if nothing is rendered at this pixel
         glClearColor(.1,.1,.1,.1) 
-        
-        #set matrix mode for matrix operations. They are used in transformations
         glMatrixMode(GL_PROJECTION)
         aspect = self.width / self.height
-        #generate perspetive projection matrix
-        #view angle in y direction, aspect ratio for field of view,
-        # , zNear distane from veiwer to the near plane, zfar distance from the viewer to the far plane
         gluPerspective(40.,aspect, 1., 40.)
-
-        #set modelview mode, which is initial value, as current matrixmode
         glMatrixMode(GL_MODELVIEW)
-        #specifies whether front--back-facing polygons use culling (are hidding)
-        #CULLING is a mode used in many 3D libraries (even in direct3d)
-        #
-        #only renders the faces that are visible every time
-        #Session05: enable culling
         glEnable(GL_CULL_FACE)
                
         clock=pygame.time.Clock()
         while True:
             dt= clock.tick(self.fps)
             self.process_input(dt)
-            #Session05: changing the name to main_loop
+            #changing the name to main_loop
             self.main_loop()
 
-    #Session05: create the main loop 
+    #create the main loop 
     def main_loop(self):
 
         # BackGround Music
         pygame.mixer.music.load('bg_music.wav')
         pygame.mixer.music.play(-1)
-
-      
-
-        
-
+        # Timer
+        start_time = time.time()
         clock = pygame.time.Clock()
+        
         while True:
-           
-
-       
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -347,6 +236,7 @@ class App(object):
                 if not self.game_over:
                     self.display()
                     dt = clock.tick(self.fps)
+                    
                     for block in self.blocks:
                         block.update(dt)
                     self.clear_past_blocks()
@@ -354,12 +244,12 @@ class App(object):
                     self.check_collisions()
                     self.process_input(dt)
 
-
-    #Session05:
+    
     #compare the boundaries of the closed blocks with the extremes of the sphere.
     #the sphere is mall so if one the extremes is between right/left boundaries is a collision
     def check_collisions(self):
         #return to the blocks only these whose z position is between 0 and 1
+        start_time = 0
         blocks = filter(lambda x: 0<x.position[2]<1, self.blocks)
         x=self.player.position[0]
         r=self.player.radius
@@ -370,24 +260,15 @@ class App(object):
                 self.game_over = True
                 pygame.mixer.Sound.play(crash_sound)
                 pygame.mixer.music.stop()
+                end_time = time.time()
+                elapsed_time = end_time - start_time
                 print("Game Over!")
                 Game_Over()
                 self.screen.blit(self.image, self.image.get_rect())
+                self.screen.blit(self.text, (100, 0))
                 pygame.display.flip()
                 
-               
-                
 
-
-              
-                
-                
-                
-                
-
-                
-
-    #Session05:
     def add_random_block(self, dt):
         self.random_dt +=dt
         if self.random_dt >= 800:
@@ -396,7 +277,7 @@ class App(object):
                 self.random_dt=0
                 self.generate_block(r)
 
-    #Session05:
+   
     def generate_block(self, r):
         size= 7 if r < 0.03 else 5
         offset = random.choice([-4,0,4])
@@ -404,14 +285,13 @@ class App(object):
         mynewblock=Block( position, size)
         self.blocks.append(mynewblock)
 
-    #Session05:
+    
     def clear_past_blocks(self):
         #extract the blocks with the given condition
         blocks = filter(lambda x: x.position[2] > 5, self.blocks)
         for block in blocks:
             self.blocks.remove(block)
             del block
-
 
     def process_input(self, dt):
         for event in pygame.event.get():
@@ -439,9 +319,6 @@ class App(object):
         self.player.position=(x,y,z)
 
 
-
-    
-    #Session05:
     def display(self):
       
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -462,14 +339,8 @@ class App(object):
         sys.exit()
 
 
-
-
-
 if __name__ == '__main__':
     app = App()
     app.start()
     g_o = Game_Over(400,300)
     g_o.run()
-  
-
-
